@@ -19,12 +19,12 @@
 # SOFTWARE.
 
 import json
+import datetime
+from datetime import datetime
 from datetime import timedelta
 import redis
 from mysql.connector import (connection)
 import config
-from datetime import datetime
-import datetime
 from ..objects.callback import Callback
 import re
 
@@ -61,21 +61,82 @@ def process_callback(bot, update, u):
     cb = Callback(update)
 
     if cb.query == "home":
-        u.state("home")
-        text = (
-            "bot del gruppo https://t.me/Utorrentitalia ancora in costruzione "
-        )
-        bot.api.call("editMessageText", {
-            "chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
-            "parse_mode": "HTML", "reply_markup":
-            json.dumps(
-                {'inline_keyboard': [
-                    [{"text": "help", "callback_data": "help"},
-                     {"text": "richiesta", "callback_data": "richiesta"}],
-                    [{"text": "ℹ️ Altre informazioni", "callback_data": "info"}]
+        querry="SELECT ruolo FROM info_utente WHERE id_utentetg='"+str(u.id)+"'"
+        cursor.execute(querry)
+        for row in cursor.fetchall():
+            ruolo=int(row[0])
+        if(ruolo==1 or ruolo==2):
+            u.state("home-admin")
+            text = (
+                "bot del gruppo https://t.me/Utorrentitalia ancora in costruzione "
+            )
+            bot.api.call("editMessageText", {
+                "chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
+                "parse_mode": "HTML", "reply_markup":
+                json.dumps(
+                    {'inline_keyboard': [
+                        [{"text": "help", "callback_data": "help"},
+                        {"text":"gestione","callback_data":"gestione"}],
+                         [{"text": "richiesta", "callback_data": "richiesta"},
+                        {"text": "ℹ️ Altre informazioni", "callback_data": "info"}]
+                    ]}
+                )
+            })
+        else:
+            u.state("home")
+            text = (
+                "bot del gruppo https://t.me/Utorrentitalia ancora in costruzione "
+            )
+            bot.api.call("editMessageText", {
+                "chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
+                "parse_mode": "HTML", "reply_markup":
+                json.dumps(
+                    {'inline_keyboard': [
+                        [{"text": "help", "callback_data": "help"},
+                         {"text": "richiesta", "callback_data": "richiesta"}],
+                        [{"text": "ℹ️ Altre informazioni", "callback_data": "info"}]
+                    ]}
+                )
+            })
+    elif: cb.query=="gestione":
+        querry="SELECT ruolo FROM info_utente WHERE id_utentetg='"+str(u.id)+"'"
+        cursor.execute(querry)
+        for row in cursor.fetchall():
+            ruolo=int(row[0])
+        if ruolo==1:
+            text(
+            "da qui puoi gestire le richieste del gruppo"
+            )
+            bot.api.call("editMessageText",{
+                "chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
+                "parse_mode": "HTML", "reply_markup":
+                json.dumps(
+                    {'inline_keyboard': [
+                        [{"text": "gestisci richieste", "callback_data": "grichieste"},
+                        {"text":"guarda i canali ed i gruppi ":"vgruppistaff"}],
+                        [{"text": "indietro", "callback_data": u.state().decode('utf-8')}]
                 ]}
             )
-        })
+            })
+            u.state("gestione-mod")
+        elif ruolo==2:
+            text(
+            "da qui puoi gestire le richieste del gruppo e gli admin del bot"
+            )
+            bot.api.call("editMessageText",{
+                "chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
+                "parse_mode": "HTML", "reply_markup":
+                json.dumps(
+                    {'inline_keyboard': [
+                        [{"text": "gestisci richieste", "callback_data": "grichieste"},
+                        {"text":"guarda i canali ed i gruppi ","callback_data":"vgruppistaff"}],
+                        [{"text":"gestici i mod e gli admin":"gmod"}]
+                        [{"text": "indietro", "callback_data": u.state().decode('utf-8')}]
+                ]}
+            )
+            })
+            u.state("gestione-admin")
+    
     elif cb.query =="richiesta":
         giorni_attesa=14
         querry="SELECT ruolo from info_utente WHERE id_utentetg='"+str(u.id)+"'"
