@@ -50,7 +50,7 @@ def incostruzione(cb):
     "parse_mode": "HTML", "reply_markup":
     json.dumps(
         {'inline_keyboard': [
-            [{"text": "home", "callback_data": "home"}],
+            [{"text": "Home", "callback_data": "home"}],
         ]}
     )
     })
@@ -68,16 +68,16 @@ def process_callback(bot, update, u):
         if(ruolo==1 or ruolo==2):
             u.state("home-admin")
             text = (
-                "bot del gruppo https://t.me/Utorrentitalia ancora in costruzione "
+                "Questo è il Bot del gruppo @Utorrentitalia"
             )
             bot.api.call("editMessageText", {
                 "chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
                 "parse_mode": "HTML", "reply_markup":
                 json.dumps(
                     {'inline_keyboard': [
-                        [{"text": "help", "callback_data": "help"},
-                        {"text":"gestione","callback_data":"gestione"}],
-                         [{"text": "richiesta", "callback_data": "richiesta"},
+                        [{"text": "Help", "callback_data": "help"},
+                        {"text":"Gestione","callback_data":"gestione"}],
+                         [{"text": "Richiesta", "callback_data": "richiesta"},
                         {"text": "ℹ️ Altre informazioni", "callback_data": "info"}]
                     ]}
                 )
@@ -85,15 +85,15 @@ def process_callback(bot, update, u):
         else:
             u.state("home")
             text = (
-                "bot del gruppo https://t.me/Utorrentitalia ancora in costruzione "
+                "Questo è il Bot del gruppo @Utorrentitalia"
             )
             bot.api.call("editMessageText", {
                 "chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
                 "parse_mode": "HTML", "reply_markup":
                 json.dumps(
                     {'inline_keyboard': [
-                        [{"text": "help", "callback_data": "help"},
-                         {"text": "richiesta", "callback_data": "richiesta"}],
+                        [{"text": "Help", "callback_data": "help"},
+                         {"text": "Richiesta", "callback_data": "richiesta"}],
                         [{"text": "ℹ️ Altre informazioni", "callback_data": "info"}]
                     ]}
                 )
@@ -105,33 +105,33 @@ def process_callback(bot, update, u):
             ruolo=int(row[0])
         if ruolo==1:
             text(
-            "da qui puoi gestire le richieste del gruppo"
+            "Da qui puoi gestire le richieste degli utenti"
             )
             bot.api.call("editMessageText",{
                 "chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
                 "parse_mode": "HTML", "reply_markup":
                 json.dumps(
                     {'inline_keyboard': [
-                        [{"text": "gestisci richieste", "callback_data": "grichieste"},
-                        {"text":"guarda i canali ed i gruppi ":"vgruppistaff"}],
-                        [{"text": "indietro", "callback_data": u.state().decode('utf-8')}]
+                        [{"text": "Gestione Richieste", "callback_data": "grichieste"},
+                        {"text":"Lista Canali e Gruppi ":"vgruppistaff"}],
+                        [{"text": "Indietro", "callback_data": u.state().decode('utf-8')}]
                 ]}
             )
             })
             u.state("gestione-mod")
         elif ruolo==2:
             text(
-            "da qui puoi gestire le richieste del gruppo e gli admin del bot"
+            "Da qui puoi gestire le richieste degli utenti e gli admin del bot"
             )
             bot.api.call("editMessageText",{
                 "chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
                 "parse_mode": "HTML", "reply_markup":
                 json.dumps(
                     {'inline_keyboard': [
-                        [{"text": "gestisci richieste", "callback_data": "grichieste"},
-                        {"text":"guarda i canali ed i gruppi ","callback_data":"vgruppistaff"}],
-                        [{"text":"gestici i mod e gli admin":"gmod"}]
-                        [{"text": "indietro", "callback_data": u.state().decode('utf-8')}]
+                        [{"text": "Gestione Richieste", "callback_data": "grichieste"},
+                        {"text":"Lista Canali e Gruppi ","callback_data":"vgruppistaff"}],
+                        [{"text":"Gestione dello staff:"gmod"}]
+                        [{"text": "Indietro", "callback_data": u.state().decode('utf-8')}]
                 ]}
             )
             })
@@ -152,16 +152,16 @@ def process_callback(bot, update, u):
                 datatest=row[0]
         if(datatest=='.'or str(datetime.now())>=str(datatest+ timedelta(days=giorni_attesa)) or ruolo==2 or ruolo==3):
                 u.state("richiesta")
-                text =("manda il genere della richiesta"                        )
+                text =("Manda il genere della richiesta"                        )
                 bot.api.call("editMessageText", {"chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
                     "parse_mode": "HTML", "reply_markup":
                     json.dumps(
                     {'inline_keyboard': [
-                    [{"text":"film",  "callback_data":"richiesta01"},
-                    {"text":"giochi","callback_data":"richiesta02"}],
-                    [{"text":"libri","callback_data":"richiesta03"},
-                    {"text":"altro","callback_data":"richiesta04"}],
-                    [{"text": "home", "callback_data": "home"}, {"text": "richieste effettuate", "callback_data": "richiestaf"}],
+                    [{"text":"Film",  "callback_data":"richiesta01"},
+                    {"text":"Giochi","callback_data":"richiesta02"}],
+                    [{"text":"Libri","callback_data":"richiesta03"},
+                    {"text":"Altro","callback_data":"richiesta04"}],
+                    [{"text": "Home", "callback_data": "home"}, {"text": "richieste effettuate", "callback_data": "richiestaf"}],
             ]}
         )
     })
@@ -180,8 +180,8 @@ def process_callback(bot, update, u):
                 [{"text": ''+str(datetime.date.today().year),  "callback_data":"richiesta05"},
                  {"text":''+str(datetime.date.today().year-1),"callback_data":"richiesta06"}],
                 [{"text":''+str(datetime.date.today().year-2),"callback_data":"richiesta07"},
-                 {"text":"altro","callback_data":"richiesta08"}],
-                [{"text": "annulla richiesta", "callback_data": "annularichiesta"}]
+                 {"text":"Altro","callback_data":"richiesta08"}],
+                [{"text": "Annulla Richiesta", "callback_data": "annularichiesta"}]
             ]}
         )
     })
@@ -190,7 +190,7 @@ def process_callback(bot, update, u):
         querry="INSERT INTO info_richieste(tipo,id_utente_richiedente) VALUES('gioco','"+str(u.id)+"')"
         cursor.execute(querry)
         text=(
-            "ora manda l'anno"
+            "Ora manda l'anno"
         )
         bot.api.call("editMessageText", {"chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
         "parse_mode": "HTML", "reply_markup":
@@ -199,8 +199,8 @@ def process_callback(bot, update, u):
                 [{"text": ''+str(datetime.date.today().year),  "callback_data":"richiesta05"},
                  {"text": ''+str(datetime.date.today().year-1),"callback_data":"richiesta06"}],
                 [{"text": ''+str(datetime.date.today().year-2),"callback_data":"richiesta07"},
-                 {"text":"altro","callback_data":"richiesta08"}],
-                [{"text": "annulla richiesta", "callback_data": "annularichiesta"}],
+                 {"text":"Altro","callback_data":"richiesta08"}],
+                [{"text": "Annulla Richiesta", "callback_data": "annularichiesta"}],
             ]}
         )
     })
@@ -209,7 +209,7 @@ def process_callback(bot, update, u):
         querry="INSERT INTO info_richieste(tipo,id_utente_richiedente) VALUES('libri','"+str(u.id)+"')"
         cursor.execute(querry)
         text=(
-            "ora manda l'anno"
+            "Ora manda l'anno"
         )
         bot.api.call("editMessageText", {"chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
         "parse_mode": "HTML", "reply_markup":
@@ -218,8 +218,8 @@ def process_callback(bot, update, u):
                 [{"text": ''+str(datetime.date.today().year),  "callback_data":"richiesta05"},
                  {"text":''+str(datetime.date.today().year-1),"callback_data":"richiesta06"}],
                 [{"text":''+str(datetime.date.today().year-2),"callback_data":"richiesta07"},
-                 {"text":"altro","callback_data":"richiesta08"}],
-                [{"text": "annulla richiesta", "callback_data": "annularichiesta"}],
+                 {"text":"Altro","callback_data":"richiesta08"}],
+                [{"text": "Annulla Richiesta", "callback_data": "annularichiesta"}],
 
             ]}
         )
@@ -230,14 +230,15 @@ def process_callback(bot, update, u):
     elif cb.query=="richiesta04":
               u.state("richiesta04")
               text=(
-                  "perfavore manda il testo"
+                  "Ora manda il Titolo o il Nome"
               )
               bot.api.call("editMessageText", {"chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
               "parse_mode": "HTML", "reply_markup":
               json.dumps(
                   {'inline_keyboard': [
-                      [{"text": "annulla richiesta", "callback_data": "annularichiesta"}],
-                      [{"text": "indietro", "callback_data": "richiesta"}],
+                      [{"text": "Annulla Richiesta", "callback_data": "annularichiesta"}],
+                      [{"text": "Indietro", "callback_data": "richiesta"}],
+                      [{"text": "Indietro", "callback_data": "richiesta"}],
                   ]}
               )
           })
@@ -251,7 +252,8 @@ def process_callback(bot, update, u):
         querry="UPDATE info_richieste SET anno='"+str(datetime.date.today().year)+"' WHERE id_richiesta='"+str(id_richiesta)+"'";
         cursor.execute(querry)
         text=(
-            "ora manda il contenuto della richiesta"
+            "                      [{"text": "Indietro", "callback_data": "richiesta"}],
+"
         )
         bot.api.call("editMessageText", {"chat_id": cb.chat.id, "message_id": cb.message.message_id, "text": text,
         "parse_mode": "HTML", "reply_markup":
