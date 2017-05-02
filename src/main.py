@@ -19,7 +19,6 @@
 # SOFTWARE.
 
 import json
-
 import botogram
 import botogram.objects.base
 from mysql.connector import (connection)
