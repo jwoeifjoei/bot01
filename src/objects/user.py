@@ -48,6 +48,8 @@ class User:
         r.hset(self.rhash, 'last_update', dt.now())
         if not self.state():
             r.hset(self.rhash, 'state', 'home')
+        if not self.stateold():
+            r.hset(self.rhash,'stateold','home')
         r.hset(self.rhash, "active", True)
 
     def state(self, new_state=None):
@@ -60,6 +62,12 @@ class User:
             return r.hget(self.rhash, 'state')
 
         r.hset(self.rhash, 'state', new_state)
+        return True
+
+    def stateold(self,new_stateold=None):
+        if not new_stateold:
+            return r.hget(self.rhash, 'stateold')
+        r.hset(self.rhash, 'stateold', new_stateold)
         return True
 
     def setRedis(self, key, value):
