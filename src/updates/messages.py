@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2016-2017 Marco Aceti <dev@marcoaceti.it>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -50,9 +51,10 @@ def process_messages(bot, message, u,sender ):
     cursor, cnx = connectmysql()
     if str(chat.type)=="private":
         if state == 'richiesta04':
+            u.stateold(u.state().decode('utf-8'))
             if not message.text:
                 return
-            querry="INSERT INTO info_richieste(tipo,id_utente_richiedente) VALUES('"+str(message.text)+"','"+str(u.id)+"')"
+            querry="INSERT INTO info_richieste(tipo,id_utente_richiedente,data_richiesta)    VALUES('film','"+str(u.id)+"','"+str(datetime.datetime.now())+"'); "
             cursor.execute(querry)
             text=(
                 "ora manda l'anno"
@@ -70,13 +72,14 @@ def process_messages(bot, message, u,sender ):
                         )
                     })
         elif state =="richiesta08":
+            u.stateold(u.state().decode('utf-8'))
             if( str(message.text).isdigit()==False or int(message.text)>int(datetime.date.today().year-2 or not  message.text)):
                 return
             else:
                 querry="SELECT max(id_richiesta) FROM info_richieste where id_utente_richiedente='"+str(u.id)+"'"
                 cursor.execute(querry)
                 for row in cursor.fetchall():
-                    id_richiesta=row[0]
+                    id_richiesta=int(row[0])+1
                 querry="UPDATE info_richieste SET anno='"+str(message.text)+"' WHERE id_richiesta='"+str(id_richiesta)+"'";
                 cursor.execute(querry)
                 text=(
@@ -91,16 +94,16 @@ def process_messages(bot, message, u,sender ):
                             )
                         })
                 u.state("richiesta09")
-
         elif state=="richiesta09":
+            u.stateold(u.state().decode('utf-8'))
             if  not message.text:
                 return
             else:
                 querry="SELECT max(id_richiesta) FROM info_richieste where id_utente_richiedente='"+str(u.id)+"'"
                 cursor.execute(querry)
                 for row in cursor.fetchall():
-                    id_richiesta=row[0]
-                querry="UPDATE info_richieste  SET contenuto_richiesta='"+str(message.text)+"',data_richiesta='"+str(datetime.datetime.now())+"' WHERE id_richiesta='"+str(id_richiesta)+"'"
+                    id_richiesta=int(row[0])
+                querry="UPDATE info_richieste  SET contenuto_richiesta='"+str(message.text)+"' WHERE id_richiesta='"+str(id_richiesta)+"'"
                 cursor.execute(querry)
                 text=(
                     "ora la richiesta sarà controllata dagli admin se andrà bene oppure no verà notificato qui sul bot"
@@ -113,10 +116,9 @@ def process_messages(bot, message, u,sender ):
                             ]}
                             )
                         })
-                message=str(message)
-                idmessaggio,c=re.split(":", message)[22].split(',')
-                querry="INSERT INTO idmessaggio(idmessaggio,idrichiesta,    tipo) VALUES('"+str(idmessaggio)+"','"+str(id_richiesta)+"','0')"
-                cursor.execute(querry)
+                idmessaggio=message["result"]["message_id"]
+                querry="INSERT INTO idmessaggiorichiesta(idmessaggio,idrichiesta,tipo) VALUES('"+str(idmessaggio)+"','"+str(id_richiesta)+"','0')"
+                #cursor.execute(querry)
                 querry="SELECT * FROM info_richieste WHERE id_richiesta='"+str(id_richiesta)+"'"
                 cursor.execute(querry)
                 for row in cursor.fetchall():
@@ -124,35 +126,24 @@ def process_messages(bot, message, u,sender ):
                     tipo=row[7]
                     giorni_attesa=14
                     date_N_days_ago= datetime.datetime.now() + timedelta(days=giorni_attesa)
-                text=("#Richiesta \n"
-                    "Utente: "+str(sender.name)+"\n"
-                    "Username: @"+str(sender.username)+"\n"
-                    "Id: "+str(sender.id)+"\n"
-                    "tipo: "+str(tipo)+"\n"
-                    "anno: "+str(anno)+"\n"
-                    "Contenuto Richiesta: \n"
-                    ""+str(message.text)+"\n"
-                    "Sblocco Prossima Richiesta:"+str(date_N_days_ago)[:10]+"\n"
-                    "UserTag: #User"+str(u.id)+"\n"
-                    "#Richiesta"+str(id_richiesta)
-                    )
+                text_messagelog="#Avvio \nUtente: "+str(sender.name)+"\nUsername: @"+str(sender.username)+"\nId: "+str(sender.id)+"\nUserTag: #User"+str(sender.id)
                 querry="SELECT idchattg FROM chatsend WHERE tipo='1'"
                 cursor.execute(querry)
                 for row in cursor.fetchall():
-                    message =bot.api.call("sendMessage",{"chat_id": row[0], "text":text,
+                    message =bot.api.call("sendMessage",{"chat_id": row[0], "text":text_messagelog,
                     "parse_mode":"HTML","reply_markup":
                         json.dumps(
                         {'inline_keyboard':[
-                        [{"text":"acceta","callback_data":"richiesta09"}],
-                        [{"text":"rifiuta","callback_data":"richiesta10"}]
+                        [{"text":"acceta","callback_data":"richiesta10"}],
+                        [{"text":"rifiuta","callback_data":"richiesta11"}]
                         ]}
                         )})
-                    message=str(message)
-                    idmessaggio,c=re.split(":", message)[22].split(',')
-                    querry="INSERT INTO idmessaggio(idmessaggio,idrichiesta,    tipo) VALUES('"+str(idmessaggio)+"','"+str(id_richiesta)+"','1')"
+                    idmessaggio=message["result"]["message_id"]
+                    querry="INSERT INTO idmessaggiorichiesta(idmessaggio,idrichiesta,tipo) VALUES('"+str(idmessaggio)+"','"+str(id_richiesta)+"','1')"
                     cursor.execute(querry)
-
-
-            disconnectmysql(cursor,cnx)
         else:
             return
+        disconnectmysql(cursor,cnx)
+
+    else:
+        return

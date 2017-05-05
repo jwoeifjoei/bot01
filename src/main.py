@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (c) 2016-2017 Marco Aceti <dev@marcoaceti.it>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,6 +27,7 @@ import config
 from .objects.callback import Callback
 from .objects.user import User
 from .updates import callback, messages
+import re
 
 def disconnectmysql(cursor,cnx):
     emp_no = cursor.lastrowid
@@ -82,7 +84,6 @@ def start(chat, message):
             idtelegram=1+int(row[0])
         dati=(str(sender.id),str(idtelegram))
         cursor.execute("INSERT INTO info_utente (id_utentetg,id_utente,posizione) VALUES (%s,%s,'0');",dati)
-        text_message='benvenuto in @TorrentItaliaBot per i vari comandi /help \n'
         text_messagelog="#Avvio \nUtente: "+str(sender.name)+"\nUsername: @"+str(sender.username)+"\nId: "+str(sender.id)+"\nUserTag: #User"+str(sender.id)
         querry="SELECT idchattg FROM chatsend WHERE tipo=0"
         cursor.execute(querry)
@@ -102,16 +103,45 @@ def start(chat, message):
         )
     })
     else:
-        bot.api.call('sendMessage', {
-        'chat_id': chat.id, 'text': text_message, 'parse_mode': 'HTML', 'reply_markup':
-        json.dumps(
-            {'inline_keyboard': [
-                [{"text": "help", "callback_data": "help"},
-                 {"text": "richiesta", "callback_data": "richiesta"}],
-                [{"text": "ℹ️ Altre informazioni", "callback_data": "info"}]
-            ]}
-        )
-    })
+        querry="SELECT ruolo FROM info_utente WHERE id_utentetg='"+str(u.id)+"'"
+        cursor.execute(querry)
+        for row in cursor.fetchall():
+            ruolo=int(row[0])
+        if(ruolo==1 or ruolo==2):
+            u.state("home-admin")
+            text = (
+                "bot del gruppo https://t.me/Utorrentitalia ancora in costruzione "
+            )
+            message =bot.api.call("sendMessage", {
+                "chat_id": chat.id,  "text": text,
+                "parse_mode": "HTML", "reply_markup":
+                json.dumps(
+                    {'inline_keyboard': [
+                        [{"text": "help", "callback_data": "help"},
+                        {"text":"gestione","callback_data":"gestione"}],
+                         [{"text": "richiesta", "callback_data": "richiesta"},
+                        {"text": "ℹ️ Altre informazioni", "callback_data": "info"}]
+                    ]}
+                )
+            })
+            print(message["result"]["message_id"])
+        else:
+            u.state("home")
+            text = (
+                "bot del gruppo https://t.me/Utorrentitalia ancora in costruzione "
+            )
+            message=bot.api.call("sendMessage", {
+                "chat_id": chat.id, "text": text,
+                "parse_mode": "HTML", "reply_markup":
+                json.dumps(
+                    {'inline_keyboard': [
+                        [{"text": "help", "callback_data": "help"},
+                         {"text": "richiesta", "callback_data": "richiesta"}],
+                        [{"text": "ℹ️ Altre informazioni", "callback_data": "info"}]
+                    ]}
+                )
+            })
+            print(message["result"]["message_id"])
 
 
     disconnectmysql(cursor,cnx)

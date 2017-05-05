@@ -23,7 +23,7 @@ config.py
 
 # OSX
 # =========================
-
+*test*
 .DS_Store
 .AppleDouble
 .LSOverride
