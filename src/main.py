@@ -77,28 +77,30 @@ def start(chat, message):
     for row in cursor.fetchall():
         idsender=row[0]
     if (str(sender.id)==str(idsender)):
-        text_message="ti sei già iscritto a questo bot per fare una richiesta fai una /richiesta"
+        _message="Ti sei già iscritto a questo bot, premi un tasto per continuare."
     elif(idsender==' '):
         cursor.execute('SELECT MAX(id_utente) FROM info_utente')
         for row in cursor.fetchall():
             idtelegram=1+int(row[0])
         dati=(str(sender.id),str(idtelegram))
         cursor.execute("INSERT INTO info_utente (id_utentetg,id_utente,posizione) VALUES (%s,%s,'0');",dati)
+
         text_messagelog="#Avvio \nUtente: "+str(sender.name)+"\nUsername: @"+str(sender.username)+"\nId: "+str(sender.id)+"\nUserTag: #User"+str(sender.id)
+
         querry="SELECT idchattg FROM chatsend WHERE tipo=0"
         cursor.execute(querry)
         for row in cursor.fetchall():
             bot.chat(row[0]).send(text_messagelog,syntax="HTML")
 
     else:
-        text_message="errore generale"
+        text_message="Errore Generale"
     if(str(chat.type)!="private"):
-        text_message="usami in chat privata\n"+text_message
+        text_message="Avviami in chat privata\n"+text_message
         bot.api.call('sendMessage', {
         'chat_id': chat.id, 'text': text_message, 'parse_mode': 'HTML', 'reply_markup':
         json.dumps(
             {'inline_keyboard': [
-            [{"text": "avviami in privata", "url": "t.me/TorrentItaliaBot"}]
+            [{"text": "Avviami in privata", "url": "t.me/TorrentItaliaBot"}]
             ]}
         )
     })
@@ -142,6 +144,7 @@ def start(chat, message):
                 )
             })
             print(message["result"]["message_id"])
+
 
 
     disconnectmysql(cursor,cnx)
