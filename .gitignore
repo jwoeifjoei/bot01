@@ -45,3 +45,4 @@ config.py
 Network Trash Folder
 Temporary Items
 .apdisk
+*.rar

@@ -67,6 +67,8 @@ bot = botogram.create(config.BOT_TOKEN)
 
 @bot.command("start")
 def start(chat, message):
+    import time
+    start_time = time.time()
     u = User(message.sender)
     u.state("home")
     u.increaseStat('stats_command_start')
@@ -77,7 +79,7 @@ def start(chat, message):
     for row in cursor.fetchall():
         idsender=row[0]
     if (str(sender.id)==str(idsender)):
-        text_message="ti sei già iscritto a questo bot per fare una richiesta fai una /richiesta"
+        text_message="Ti sei già iscritto a questo bot, premi un tasto per continuare."
     elif(idsender==' '):
         cursor.execute('SELECT MAX(id_utente) FROM info_utente')
         for row in cursor.fetchall():
@@ -91,17 +93,19 @@ def start(chat, message):
             bot.chat(row[0]).send(text_messagelog,syntax="HTML")
 
     else:
-        text_message="errore generale"
+        text_message="Errore Generale"
     if(str(chat.type)!="private"):
-        text_message="usami in chat privata\n"+text_message
+        text_message=text_message+"\n "
+        text_message="Avviami in chat privata\n"+text_message
         bot.api.call('sendMessage', {
         'chat_id': chat.id, 'text': text_message, 'parse_mode': 'HTML', 'reply_markup':
         json.dumps(
             {'inline_keyboard': [
-            [{"text": "avviami in privata", "url": "t.me/TorrentItaliaBot"}]
+            [{"text": "Avviami in privata", "url": "t.me/TorrentItaliaBot"}]
             ]}
         )
     })
+        print(str(chat.id)+"id chat gruppo nuovo")
     else:
         querry="SELECT ruolo FROM info_utente WHERE id_utentetg='"+str(u.id)+"'"
         cursor.execute(querry)
@@ -110,17 +114,17 @@ def start(chat, message):
         if(ruolo==1 or ruolo==2):
             u.state("home-admin")
             text = (
-                "bot del gruppo https://t.me/Utorrentitalia ancora in costruzione "
+                "Questo è il bot di @TorrentItalia"
             )
             message =bot.api.call("sendMessage", {
                 "chat_id": chat.id,  "text": text,
                 "parse_mode": "HTML", "reply_markup":
                 json.dumps(
                     {'inline_keyboard': [
-                        [{"text": "help", "callback_data": "help"},
-                        {"text":"gestione","callback_data":"gestione"}],
-                         [{"text": "richiesta", "callback_data": "richiesta"},
-                        {"text": "ℹ️ Altre informazioni", "callback_data": "info"}]
+                        [{"text": "Help", "callback_data": "help"},
+                        {"text":"Gestione","callback_data":"gestione"}],
+                         [{"text": "Richiesta", "callback_data": "richiesta"},
+                        {"text": "ℹ️ Altre Informazioni", "callback_data": "info"}]
                     ]}
                 )
             })
@@ -128,16 +132,16 @@ def start(chat, message):
         else:
             u.state("home")
             text = (
-                "bot del gruppo https://t.me/Utorrentitalia ancora in costruzione "
+                "Questo è il bot di @TorrentItalia"
             )
             message=bot.api.call("sendMessage", {
                 "chat_id": chat.id, "text": text,
                 "parse_mode": "HTML", "reply_markup":
                 json.dumps(
                     {'inline_keyboard': [
-                        [{"text": "help", "callback_data": "help"},
-                         {"text": "richiesta", "callback_data": "richiesta"}],
-                        [{"text": "ℹ️ Altre informazioni", "callback_data": "info"}]
+                        [{"text": "Help", "callback_data": "help"},
+                         {"text": "Richiesta", "callback_data": "richiesta"}],
+                        [{"text": "ℹ️ Altre Informazioni", "callback_data": "info"}]
                     ]}
                 )
             })
@@ -145,6 +149,8 @@ def start(chat, message):
 
 
     disconnectmysql(cursor,cnx)
+    print("--- %s seconds ---" % (time.time() - start_time))
+
 @bot.command("sendall")
 def sendall_command(chat,message,args):
     cursor, cnx = connectmysql()

@@ -46,6 +46,8 @@ def connectmysql():
 
 
 def process_messages(bot, message, u,sender ):
+    import time
+    start_time = time.time()
     state = u.state().decode('utf-8')  # Redis returns strings in bytes, state must be converted in strings
     chat = message.chat
     cursor, cnx = connectmysql()
@@ -103,6 +105,7 @@ def process_messages(bot, message, u,sender ):
                 cursor.execute(querry)
                 for row in cursor.fetchall():
                     id_richiesta=int(row[0])
+                messaggio=message.text
                 querry="UPDATE info_richieste  SET contenuto_richiesta='"+str(message.text)+"' WHERE id_richiesta='"+str(id_richiesta)+"'"
                 cursor.execute(querry)
                 text=(
@@ -117,16 +120,17 @@ def process_messages(bot, message, u,sender ):
                             )
                         })
                 idmessaggio=message["result"]["message_id"]
-                querry="INSERT INTO idmessaggiorichiesta(idmessaggio,idrichiesta,tipo) VALUES('"+str(idmessaggio)+"','"+str(id_richiesta)+"','0')"
-                #cursor.execute(querry)
+                querry="INSERT INTO idmessaggiorichiesta(idmessaggio,idrichiesta,tipo,idchat) VALUES('"+str(idmessaggio)+"','"+str(id_richiesta)+"','0','"+str(chat.id)+"')"
+                cursor.execute(querry)
                 querry="SELECT * FROM info_richieste WHERE id_richiesta='"+str(id_richiesta)+"'"
                 cursor.execute(querry)
                 for row in cursor.fetchall():
+                    richiestan=row[0]
                     anno=row[6]
                     tipo=row[7]
                     giorni_attesa=14
                     date_N_days_ago= datetime.datetime.now() + timedelta(days=giorni_attesa)
-                text_messagelog="#Avvio \nUtente: "+str(sender.name)+"\nUsername: @"+str(sender.username)+"\nId: "+str(sender.id)+"\nUserTag: #User"+str(sender.id)
+                text_messagelog="#Richiesta \nUtente: "+str(sender.name)+"\nUsername: @"+str(sender.username)+"\nTipo: "+str(tipo)+"\nAnno: "+str(anno)+"\nContenuto Richiesta: \n"+str(messaggio)+"\nSblocco Prossima Richiesta:"+str(date_N_days_ago)[:10]+"\nUserTag: #User"+str(u.id)+"\n#Richiesta"+str(richiestan)
                 querry="SELECT idchattg FROM chatsend WHERE tipo='1'"
                 cursor.execute(querry)
                 for row in cursor.fetchall():
@@ -139,11 +143,52 @@ def process_messages(bot, message, u,sender ):
                         ]}
                         )})
                     idmessaggio=message["result"]["message_id"]
-                    querry="INSERT INTO idmessaggiorichiesta(idmessaggio,idrichiesta,tipo) VALUES('"+str(idmessaggio)+"','"+str(id_richiesta)+"','1')"
+                    querry="INSERT INTO idmessaggiorichiesta(idmessaggio,idrichiesta,tipo,idchat) VALUES('"+str(idmessaggio)+"','"+str(id_richiesta)+"','1','"+str(row[0])+"')"
                     cursor.execute(querry)
+        elif state=="richiesta15":
+            u.stateold(u.state().decode('utf-8'))
+            u.state("richiesta16")
+            if(  not  message.text):
+                return
+            else:
+                id_richiesta=int(u.richiestaid().decode('utf-8'))
+                querry="UPDATE info_richieste SET status=2 WHERE id_richiesta='"+str(id_richiesta)+"'"
+                cursor.execute(querry)
+                querry="SELECT idmessaggio,tipo,idchat FROM idmessaggiorichiesta WHERE idrichiesta='"+str(id_richiesta)+"'"
+                cursor.execute(querry)
+                for row in cursor.fetchall():
+                        if(int(row[1])==1):
+                            text=(
+                            "la richiesta non è stata accettata perchè "+str(message.text)+" fatta p.s. finire il testo"
+                            )
+                            bot.api.call("editMessageText", {"chat_id": row[2], "message_id": row[0], "text": text,
+                            "parse_mode": "HTML"
+                                })
+                        elif(int(row[1])==0):
+                            text=(
+                            "richiesta non accettata perchè "+str(message.text)+" testo in elaborazione "
+                            )
+                            message=bot.api.call("editMessageText", {"chat_id": row[2], "message_id": row[0], "text": text,
+                                "parse_mode": "HTML", "reply_markup":
+                                    json.dumps(
+                                        {'inline_keyboard': [
+                                            [{"text": "home", "callback_data": "home"}],
+                                            [{"text": "status richieste","callback_data":"richiestaf"}]
+                                            ]}
+                                            )
+                                            })
+                        elif(int(row[1])==2):
+                            text=(
+                            "richiesta non accetta perchè "+str(message.text)+" "
+                            )
+                            bot.api.call("editMessageText",{"chat_id":row[2],"message_id": row[0],"text":text,
+                            "parse_mode":"HTML"})
+
+
         else:
             return
         disconnectmysql(cursor,cnx)
 
     else:
         return
+    print("--- %s seconds ---" % (time.time() - start_time)+str(state)+"     "+str(u.id))

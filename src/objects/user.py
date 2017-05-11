@@ -50,7 +50,10 @@ class User:
             r.hset(self.rhash, 'state', 'home')
         if not self.stateold():
             r.hset(self.rhash,'stateold','home')
+        if not self.richiestaid():
+            r.hset(self.rhash, 'richiestaid','0')
         r.hset(self.rhash, "active", True)
+
 
     def state(self, new_state=None):
         """
@@ -69,6 +72,11 @@ class User:
             return r.hget(self.rhash, 'stateold')
         r.hset(self.rhash, 'stateold', new_stateold)
         return True
+    def richiestaid(self,new_state=None):
+        if not new_state:
+            return r.hget(self.rhash, 'richiestaid')
+        r.hset(self.rhash,'richiestaid',new_state)
+
 
     def setRedis(self, key, value):
         """
